@@ -1,9 +1,12 @@
-﻿using WebApi.Helpers;
+﻿using AadeshPharmaWeb.Model;
+using WebApi.Helpers;
 using WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // add services to DI container
+builder.Services.Configure<AadeshPharmaDatabaseConfiguration>(
+                builder.Configuration.GetSection("AadeshPharmaDatabase"));
 {
     var services = builder.Services;
     services.AddCors();

@@ -1,6 +1,7 @@
 ﻿namespace WebApi.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Entities;
 using WebApi.Helpers;
 using WebApi.Models;
 using WebApi.Services;
@@ -17,9 +18,9 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("authenticate")]
-    public IActionResult Authenticate(AuthenticateRequest model)
+ public async  Task<IActionResult> Authenticate(AuthenticateRequest model)
     {
-        var response = _userService.Authenticate(model);
+        var response = await _userService.Authenticate(model);
 
         if (response == null)
             return BadRequest(new { message = "Username or password is incorrect" });
@@ -27,11 +28,22 @@ public class UsersController : ControllerBase
         return Ok(response);
     }
 
-    [Authorize]
-    [HttpGet]
-    public IActionResult GetAll()
+    //[Authorize]
+    //[HttpGet]
+    //public IActionResult GetAll()
+    //{
+    //    var users = _userService.GetAll();
+    //    return Ok(users);
+    //}
+
+    [HttpPost("createUser")]
+    public IActionResult CreateUser(User user, string password)
     {
-        var users = _userService.GetAll();
-        return Ok(users);
+        var response = _userService.Register(user,password);
+
+        if (response == null)
+            return BadRequest(new { message = "Something Went wrong" });
+
+        return Ok(response);
     }
 }

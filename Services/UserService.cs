@@ -1,9 +1,13 @@
 namespace WebApi.Services;
 
+using AadeshPharmaWeb.Model;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Driver;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using WebApi.Entities;
 using WebApi.Helpers;
@@ -11,32 +15,37 @@ using WebApi.Models;
 
 public interface IUserService
 {
-    AuthenticateResponse Authenticate(AuthenticateRequest model);
-    IEnumerable<User> GetAll();
-    User GetById(int id);
+    Task<AuthenticateResponse> Authenticate(AuthenticateRequest model);
+    Task<AuthenticateResponse> Register(User user, string password);
+    //IEnumerable<User> GetAll();
+    //User GetById(int id);
+    Task<User> GetById(string id);
 }
 
 public class UserService : IUserService
-{
-    // users hardcoded for simplicity, store in a db with hashed passwords in production applications
-    private List<User> _users = new List<User>
-    {
-        new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test" }
-    };
 
     private readonly AppSettings _appSettings;
-
-    public UserService(IOptions<AppSettings> appSettings)
+    private readonly IMongoCollection<User> _userCollection;
+    private readonly PasswordHasher<object> _passwordHasher;
+    public UserService(IOptions<AppSettings> appSettings, IOptions<AadeshPharmaDatabaseConfiguration> database)
     {
+        _appSettings = appSettings.Value;
+        var mongoClient = new MongoClient(database.Value.ConnectionString);
+        var mongoDatabase = mongoClient.GetDatabase(database.Value.DatabaseName);
+        _userCollection = mongoDatabase.GetCollection<User>(database.Value.UserCollectionName);
+
+        _passwordHasher = new PasswordHasher<object>();
+
         _appSettings = appSettings.Value;
     }
 
-    public AuthenticateResponse Authenticate(AuthenticateRequest model)
+    public async Task<AuthenticateResponse> Authenticate(AuthenticateRequest model)
     {
-        var user = _users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
-
-        // return null if user not found
-        if (user == null) return null;
+        //var user = await _userCollection.Find(u => u.Id == id).FirstOrDefaultAsync(); ;
+        
+        var user = await _userCollection.Find(u => u.Username == model.Username).FirstOrDefaultAsync();
+        if (user == null || !VerifyHashedPassword( user.PasswordHash, model.Password))
+            return null;
 
         // authentication successful so generate jwt token
         var token = generateJwtToken(user);
@@ -44,17 +53,27 @@ public class UserService : IUserService
         return new AuthenticateResponse(user, token);
     }
 
-    public IEnumerable<User> GetAll()
+    public async Task<AuthenticateResponse> Register(User user, string password)
     {
-        return _users;
+        if (await _userCollection.Find(u => u.Username == user.Username).AnyAsync())
+            throw new Exception("Username already exists");
+
+        //user.PasswordHash = CreatePasswordHash(password);
+        user.PasswordHash=HashPassword(password);
+        user.Id=Guid.NewGuid().ToString();
+        await _userCollection.InsertOneAsync(user);
+
+        var token = generateJwtToken(user);
+        var response = new AuthenticateResponse(user, token);
+
+        return response;
+        //return user;
     }
 
-    public User GetById(int id)
+    public async Task<User> GetById(string id)
     {
-        return _users.FirstOrDefault(x => x.Id == id);
+        return await _userCollection.Find(u => u.Id == id).FirstOrDefaultAsync();
     }
-
-    // helper methods
 
     private string generateJwtToken(User user)
     {
@@ -69,5 +88,40 @@ public class UserService : IUserService
         };
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
+    }
+
+    /// <summary>
+    /// Hashes a password.
+    /// </summary>
+    /// <param name="password">The password to hash.</param>
+    /// <returns>The hashed password.</returns>
+    public string HashPassword(string password)
+    {
+        if (string.IsNullOrEmpty(password))
+            throw new ArgumentException("Password cannot be null or empty.", nameof(password));
+
+        // Create a dummy user object; it's not used but required by PasswordHasher
+        var user = new object();
+        return _passwordHasher.HashPassword(user, password);
+    }
+
+    /// <summary>
+    /// Verifies a password against a hashed password.
+    /// </summary>
+    /// <param name="hashedPassword">The hashed password.</param>
+    /// <param name="password">The password to verify.</param>
+    /// <returns>True if the password matches the hashed password; otherwise, false.</returns>
+    public bool VerifyHashedPassword(string hashedPassword, string password)
+    {
+        if (string.IsNullOrEmpty(hashedPassword))
+            throw new ArgumentException("Hashed password cannot be null or empty.", nameof(hashedPassword));
+
+        if (string.IsNullOrEmpty(password))
+            throw new ArgumentException("Password cannot be null or empty.", nameof(password));
+
+        // Create a dummy user object; it's not used but required by PasswordHasher
+        var user = new object();
+        var result = _passwordHasher.VerifyHashedPassword(user, hashedPassword, password);
+        return result == PasswordVerificationResult.Success;
     }
 }
