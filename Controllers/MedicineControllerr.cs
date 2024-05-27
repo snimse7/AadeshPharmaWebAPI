@@ -1,10 +1,8 @@
 ﻿using AadeshPharmaWeb.Interface;
-using AadeshPharmaWeb.JWt;
 using AadeshPharmaWeb.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using static AadeshPharmaWeb.Model.Userr;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace AadeshPharmaWeb.Controllers

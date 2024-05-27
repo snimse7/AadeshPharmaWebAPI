@@ -4,6 +4,7 @@ using AadeshPharmaWeb.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualBasic;
 using MongoDB.Driver;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -19,11 +20,13 @@ public interface IUserService
     Task<AuthenticateResponse> Register(User user, string password);
     //IEnumerable<User> GetAll();
     //User GetById(int id);
-    Task<User> GetById(string id);
+    User GetById(string id);
+    bool UpdateUser(User user);
+    bool AddAddress(Address address, string userId);
 }
 
 public class UserService : IUserService
-
+{
     private readonly AppSettings _appSettings;
     private readonly IMongoCollection<User> _userCollection;
     private readonly PasswordHasher<object> _passwordHasher;
@@ -70,11 +73,51 @@ public class UserService : IUserService
         //return user;
     }
 
-    public async Task<User> GetById(string id)
+    public  User GetById(string id)
     {
-        return await _userCollection.Find(u => u.Id == id).FirstOrDefaultAsync();
+        try
+        {
+            return  _userCollection.Find(u => u.Id == id).FirstOrDefault();
+
+        }
+        catch { throw; }
+    }
+    public bool UpdateUser(User user)
+    {
+        try
+        {
+            var filter = Builders<User>.Filter.Where(u => u.Id == user.Id);
+
+            // Perform the replace operation
+            //var result =  _userCollection.ReplaceOne(filter, user);
+
+            var updateUser=Builders<User>.Update.Set(u => u.Email, user.Email)
+                                                 .Set(u=>u.FirstName,user.FirstName)
+                                                 .Set(u=>u.LastName,user.LastName)
+                                                 .Set(u=>u.isAdmin,user.isAdmin);
+            var result =  _userCollection.UpdateOne(filter, updateUser);
+            if (result.IsModifiedCountAvailable) return true;
+            return false;
+        }
+        catch { throw; }
     }
 
+    public bool AddAddress(Address address,string userId)
+    {
+        try
+        {
+            var filter = Builders<User>.Filter.Where(u => u.Id == userId);
+
+            // Perform the replace operation
+            //var result =  _userCollection.ReplaceOne(filter, user);
+
+            var updateUser = Builders<User>.Update.Push(u=>u.address,address);
+            var result = _userCollection.UpdateOne(filter, updateUser);
+            if (result.IsModifiedCountAvailable) return true;
+            return false;
+        }
+        catch { throw; }
+    }
     private string generateJwtToken(User user)
     {
         // generate token that is valid for 7 days
