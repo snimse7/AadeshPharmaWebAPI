@@ -37,51 +37,13 @@ public class UsersController : ControllerBase
     //}
 
     [HttpPost("createUser")]
-    public async Task<IActionResult> CreateUser(User user, string password)
+    public IActionResult CreateUser(User user, string password)
     {
-        var response = await _userService.Register(user,password);
+        var response = _userService.Register(user,password);
 
         if (response == null)
             return BadRequest(new { message = "Something Went wrong" });
 
         return Ok(response);
     }
-
-
-    [Authorize]
-    [HttpGet("GetUserById")]
-    public  IActionResult GetUserById(string id)
-    {
-        var response =  _userService.GetById(id);
-
-        if (response == null)
-            return BadRequest(new { message = "Something Went wrong" });
-
-        return Ok(response);
-    }
-
-    [Authorize]
-    [HttpPut("UpdateUser")]
-    public IActionResult UpdateUser(User user)
-    {
-        var response = _userService.UpdateUser(user);
-
-        if (response == null)
-            return BadRequest(new { message = "Something Went wrong" });
-
-        return Ok(response);
-    }
-
-    [Authorize]
-    [HttpPut("AddAddress")]
-    public IActionResult AddAddress(Address address, string userId)
-    {
-        var response = _userService.AddAddress(address,userId);
-
-        if (response == null)
-            return BadRequest(new { message = "Something Went wrong" });
-
-        return Ok(response);
-    }
-
 }

@@ -1,6 +1,4 @@
-﻿using AadeshPharmaWeb.DAO;
-using AadeshPharmaWeb.Interface;
-using AadeshPharmaWeb.Model;
+﻿using AadeshPharmaWeb.Model;
 using WebApi.Helpers;
 using WebApi.Services;
 
@@ -19,8 +17,6 @@ builder.Services.Configure<AadeshPharmaDatabaseConfiguration>(
 
     // configure DI for application services
     services.AddScoped<IUserService, UserService>();
-    builder.Services.AddScoped<IAadeshPharma, AadeshPharmaDAO>();
-
 }
 
 var app = builder.Build();
