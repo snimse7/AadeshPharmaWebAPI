@@ -18,7 +18,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("authenticate")]
- public async  Task<IActionResult> Authenticate(AuthenticateRequest model)
+    public async  Task<IActionResult> Authenticate(AuthenticateRequest model)
     {
         var response = await _userService.Authenticate(model);
 
@@ -37,9 +37,71 @@ public class UsersController : ControllerBase
     //}
 
     [HttpPost("createUser")]
-    public IActionResult CreateUser(User user, string password)
+    public async Task<IActionResult> CreateUser(User user, string password)
     {
-        var response = _userService.Register(user,password);
+        var response = await _userService.Register(user,password);
+
+        if (response == null)
+            return BadRequest(new { message = "Something Went wrong" });
+
+        return Ok(response);
+    }
+
+    
+
+    [Authorize]
+    [HttpPut("UpdateUser")]
+    public IActionResult UpdateUser(User user)
+    {
+        var response = _userService.UpdateUser(user);
+
+        if (response == null)
+            return BadRequest(new { message = "Something Went wrong" });
+
+        return Ok(response);
+    }
+
+    [Authorize]
+    [HttpGet("GetUserById")]
+    public IActionResult GetUser(string id)
+    {
+        var response = _userService.GetUserById(id);
+
+        if (response == null)
+            return BadRequest(new { message = "Something Went wrong" });
+
+        return Ok(response);
+    }
+
+    [Authorize]
+    [HttpPut("AddAddress")]
+    public IActionResult AddAddress(Address address, string id)
+    {
+        var response = _userService.AddAddress(address, id);
+
+        if (response == null)
+            return BadRequest(new { message = "Something Went wrong" });
+
+        return Ok(response);
+    }
+
+    [Authorize]
+    [HttpPut("UpdateAddress")]
+    public IActionResult UpdateAddress(Address address, string id)
+    {
+        var response = _userService.UpdateAddress(address,id);
+
+        if (response == null)
+            return BadRequest(new { message = "Something Went wrong" });
+
+        return Ok(response);
+    }
+
+    [Authorize]
+    [HttpDelete("DeleteAddress")]
+    public IActionResult DeleteAddress(string addressId, string id)
+    {
+        var response = _userService.DeleteAddress(addressId, id);
 
         if (response == null)
             return BadRequest(new { message = "Something Went wrong" });

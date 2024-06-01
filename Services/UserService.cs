@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -17,12 +18,17 @@ public interface IUserService
 {
     Task<AuthenticateResponse> Authenticate(AuthenticateRequest model);
     Task<AuthenticateResponse> Register(User user, string password);
+    User GetUserById(string id);
     //IEnumerable<User> GetAll();
     //User GetById(int id);
-    Task<User> GetById(string id);
+    bool AddAddress(Address address, string id);
+    
+    bool UpdateAddress(Address address, string id);
+    bool UpdateUser(User user);
+    bool DeleteAddress(string addressId, string id);
 }
 
-public class UserService : IUserService
+public class UserService : IUserService { 
 
     private readonly AppSettings _appSettings;
     private readonly IMongoCollection<User> _userCollection;
@@ -69,6 +75,17 @@ public class UserService : IUserService
         return response;
         //return user;
     }
+    public User GetUserById(string id)
+    {
+        try
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.Id, id);
+            var user = _userCollection.Find( filter).FirstOrDefault();
+            return user;
+        }
+        catch { throw; }
+    }
+
 
     public async Task<User> GetById(string id)
     {
@@ -124,4 +141,82 @@ public class UserService : IUserService
         var result = _passwordHasher.VerifyHashedPassword(user, hashedPassword, password);
         return result == PasswordVerificationResult.Success;
     }
+
+    public bool AddAddress(Address address,string id)
+    {
+        try
+        {
+            address.addressId = Guid.NewGuid().ToString();
+            var filter = Builders<User>.Filter.Where(u => u.Id == id);
+            var update = Builders<User>.Update.Push(u=>u.address, address);
+            var result = _userCollection.UpdateOne(filter, update);
+            if (result.ModifiedCount > 0) return true;
+            return false;
+        }
+        catch  { throw; }
+    }
+    public  bool UpdateAddress(Address address,string id)
+    {
+        try
+        {
+            User curr =  GetUserById(id);
+            int addressIndex=-1;
+            for(int i=0;i<curr.address.Count;i++)
+            {
+                if (curr.address[i].addressId == address.addressId)
+                {
+                    addressIndex = i;
+                    break;
+                }
+            }
+           
+            var filter = Builders<User>.Filter.Where(u => u.Id == id);
+            var update = Builders<User>.Update.Set(u => u.address[addressIndex], address);
+            var result = _userCollection.UpdateOne(filter, update);
+            if (result.ModifiedCount > 0) return true;
+            return false ;
+        }
+        catch { throw; }
+    }
+    public bool UpdateUser(User user)
+    {
+        try
+        {
+            var filter = Builders<User>.Filter.Where(u => u.Id == user.Id);
+            var update = Builders<User>.Update.Set(u=>u.FirstName,user.FirstName)
+                                               .Set(u=>u.LastName,user.LastName)
+                                               .Set(u=>u.Email,user.Email)
+                                               .Set(u=>u.isAdmin,user.isAdmin);
+            var result = _userCollection.UpdateOne(filter, update);
+            if (result.ModifiedCount > 0) return true;
+            return false;
+        }
+        catch { throw; }
+
+    }
+
+    public bool DeleteAddress(string addressId,string id)
+    {
+        try
+        {
+            User curr = GetUserById(id);
+            int addressIndex = -1;
+            for (int i = 0; i < curr.address.Count; i++)
+            {
+                if (curr.address[i].addressId == addressId)
+                {
+                    addressIndex = i;
+                    break;
+                }
+            }
+
+            var filter = Builders<User>.Filter.Where(u => u.Id == id);
+            var update = Builders<User>.Update.PullFilter(u => u.address, a => a.addressId == addressId);
+            var result = _userCollection.UpdateOne(filter, update);
+            if (result.ModifiedCount > 0) return true;
+            return false;
+        }
+        catch { throw; }
+    }
+
 }

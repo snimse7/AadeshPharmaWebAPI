@@ -1,4 +1,6 @@
-﻿using AadeshPharmaWeb.Model;
+﻿using AadeshPharmaWeb.DAO;
+using AadeshPharmaWeb.Interface;
+using AadeshPharmaWeb.Model;
 using WebApi.Helpers;
 using WebApi.Services;
 
@@ -17,6 +19,7 @@ builder.Services.Configure<AadeshPharmaDatabaseConfiguration>(
 
     // configure DI for application services
     services.AddScoped<IUserService, UserService>();
+    services.AddScoped<IAadeshPharma, AadeshPharmaDAO>();
 }
 
 var app = builder.Build();
@@ -35,4 +38,4 @@ var app = builder.Build();
     app.MapControllers();
 }
 
-app.Run("http://localhost:4000");
+app.Run();

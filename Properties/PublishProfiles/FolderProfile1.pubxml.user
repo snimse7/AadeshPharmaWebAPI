@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\Games\AadeshPharma\Deploy</_PublishTargetUrl>
+    <History>True|2024-05-30T17:12:58.6854810Z;True|2024-05-30T22:37:05.1630300+05:30;True|2024-05-30T14:23:56.7662012+05:30;True|2024-05-30T14:22:44.3250747+05:30;True|2024-05-29T22:48:24.6741727+05:30;True|2024-05-29T22:35:01.9942615+05:30;True|2024-05-29T22:20:17.4308301+05:30;True|2024-05-29T22:09:26.6066822+05:30;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+</Project>

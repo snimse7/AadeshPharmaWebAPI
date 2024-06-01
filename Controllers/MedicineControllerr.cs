@@ -1,11 +1,14 @@
 ﻿using AadeshPharmaWeb.Interface;
-using AadeshPharmaWeb.JWt;
+
 using AadeshPharmaWeb.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using static AadeshPharmaWeb.Model.Userr;
+using WebApi.Helpers;
+
+
 using System.IdentityModel.Tokens.Jwt;
+using AuthorizeAttribute = WebApi.Helpers.AuthorizeAttribute;
 
 namespace AadeshPharmaWeb.Controllers
 {
@@ -24,14 +27,14 @@ namespace AadeshPharmaWeb.Controllers
 
         }
 
+        [Authorize]
         [HttpPost]
-        
         [Route("/AddMedicine")]
-        public async Task<bool> addMedicine(Medicines medicines)
+        public  bool addMedicine(Medicines medicines)
         {
             try
             {
-                return await _aadeshPharma.addMedicine(medicines);
+                return  _aadeshPharma.addMedicine(medicines);
             }
             catch  { throw; }
         }
@@ -69,6 +72,40 @@ namespace AadeshPharmaWeb.Controllers
             catch { throw; }
         }
 
-        
+        [Authorize]
+        [HttpPost]
+        [Route("/UpsertMedicine")]
+        public IActionResult upsertMedicine(Medicines medicines)
+        {
+            try
+            {
+                return Ok(_aadeshPharma.upser(medicines));
+            }
+            catch { throw; }
+        }
+
+        [Authorize]
+        [HttpPut]
+        [Route("/UpdateMedicine")]
+        public IActionResult updateMedicine(Medicines medicines)
+        {
+            try
+            {
+                return Ok(_aadeshPharma.update(medicines));
+            }
+            catch { throw; }
+        }
+
+        [Authorize]
+        [HttpDelete]
+        [Route("/DeleteMedicine")]
+        public IActionResult deleteMedicine(string id)
+        {
+            try
+            {
+                return Ok(_aadeshPharma.deleteMedecine(id));
+            }
+            catch { throw; }
+        }
     }
 }
