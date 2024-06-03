@@ -6,5 +6,7 @@
         public string DatabaseName { get; set; } = null!;
         public string UserCollectionName { get; set; } = null!;
         public string AadeshPharmaCollection { get; set; } = null!;
+        public string OrderCollectionName { get; set; } = null!;
+
     }
 }
