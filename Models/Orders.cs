@@ -20,8 +20,15 @@ namespace WebApi.Models
         public double totalAmount { get; set; }
         public DateTime orderDate { get; set; }
         public DateTime? delieveryDate { get; set; }
-        public string status { get; set; } //Pending, Shipped, Delivered, Cancelled
+        public List<Events> events { get; set; }
         public string modeOfPayment { get; set; }
+    }
+
+    public class Events
+    {
+        public string status { get; set; } //Created,Placed, Shipped, Delivered, Cancelled
+        public DateTime eventDate { get; set; }   
+
     }
 
 }

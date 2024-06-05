@@ -22,8 +22,18 @@ namespace WebApi.Services
             {
                 order.orderId = Guid.NewGuid().ToString();
                 order.orderDate = DateTime.Now;
-                order.status = "Pending";
+                order.events.Add(new Events());
+                order.events[0].status = "Created";
+                order.events[0].eventDate=DateTime.Now;
+
+                order.events.Add(new Events());
+                order.events[1].status = "Placed";
+                order.events[1].eventDate = DateTime.Now;
+
+
                 _orderCollection.InsertOne(order);
+
+
                 return order.orderId;
             }
             catch { throw; }
@@ -38,6 +48,40 @@ namespace WebApi.Services
                 return r;
             }
             catch { throw; };
+        }
+
+        public long getOrderCount()
+        {
+            try
+            {
+                var res = _orderCollection.EstimatedDocumentCount();
+                return res;
+            }
+            catch { throw; }
+        }
+        public double getTotalAmtofOrders()
+        {
+            try
+            {
+                double totalAmt = 0d;
+                var res = getAllOrders();
+                for (int i=0;i<res.Count; i++)
+                {
+                    totalAmt += res[i].totalAmount;
+                }
+                return totalAmt;
+            }
+            catch { throw; }
+        }
+
+        public List<Order> getAllOrders()
+        {
+            try
+            {
+                var res = _orderCollection.Find(Builders<Order>.Filter.Empty).ToList();
+                return res;
+            }
+            catch { throw; }
         }
     }
 }

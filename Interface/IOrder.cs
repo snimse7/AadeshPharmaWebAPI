@@ -6,5 +6,8 @@ namespace WebApi.Interface
     {
         string createOrder(Order order);
         List<Order> getOrdersByUser(string userId);
+        long getOrderCount();
+        double getTotalAmtofOrders();
+        List<Order> getAllOrders();
     }
 }

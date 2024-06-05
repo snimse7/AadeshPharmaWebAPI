@@ -55,5 +55,44 @@ namespace AadeshPharmaWeb.Controllers
 
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpGet("/GetTotalOrderCount")]
+        public IActionResult getOrderCount()
+        {
+
+            var response = _order.getOrderCount();
+
+            if (response == null)
+                return BadRequest(new { message = "Something Went wrong" });
+
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("/getTotalAmtofOrders")]
+        public IActionResult getTotalAmtofOrders()
+        {
+
+            var response = _order.getTotalAmtofOrders();
+
+            if (response == null)
+                return BadRequest(new { message = "Something Went wrong" });
+
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("/getAllOrders")]
+        public IActionResult getAllOrders()
+        {
+
+            var response = _order.getAllOrders();
+
+            if (response == null)
+                return BadRequest(new { message = "Something Went wrong" });
+
+            return Ok(response);
+        }
     }
 }

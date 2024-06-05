@@ -108,4 +108,16 @@ public class UsersController : ControllerBase
 
         return Ok(response);
     }
+
+    [Authorize]
+    [HttpGet("GetUserCount")]
+    public IActionResult getUserCount()
+    {
+        var response = _userService.getUserCount();
+
+        if (response == null)
+            return BadRequest(new { message = "Something Went wrong" });
+
+        return Ok(response);
+    }
 }

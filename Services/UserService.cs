@@ -26,6 +26,7 @@ public interface IUserService
     bool UpdateAddress(Address address, string id);
     bool UpdateUser(User user);
     bool DeleteAddress(string addressId, string id);
+    long getUserCount();
 }
 
 public class UserService : IUserService { 
@@ -217,6 +218,16 @@ public class UserService : IUserService {
             return false;
         }
         catch { throw; }
+    }
+
+    public long getUserCount()
+    {
+        try
+        {
+            var result = _userCollection.EstimatedDocumentCount();
+            return result;
+        }
+        catch { throw;}
     }
 
 }
