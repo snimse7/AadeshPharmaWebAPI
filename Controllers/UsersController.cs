@@ -120,4 +120,29 @@ public class UsersController : ControllerBase
 
         return Ok(response);
     }
+
+    [Authorize]
+    [HttpGet("GetAllUsers")]
+    public IActionResult getAllUsers()
+    {
+        var response = _userService.getAllUsers();
+
+        if (response == null)
+            return BadRequest(new { message = "Something Went wrong" });
+
+        return Ok(response);
+    }
+
+    [Authorize]
+    [HttpGet("DeleteUser")]
+    public IActionResult deleteUser(string id)
+    {
+        var response = _userService.deleteUser(id);
+
+        if (response == null)
+            return BadRequest(new { message = "Something Went wrong" });
+
+        return Ok(response);
+    }
+
 }

@@ -27,6 +27,8 @@ public interface IUserService
     bool UpdateUser(User user);
     bool DeleteAddress(string addressId, string id);
     long getUserCount();
+    List<User> getAllUsers();
+    bool deleteUser(string id);
 }
 
 public class UserService : IUserService { 
@@ -229,5 +231,23 @@ public class UserService : IUserService {
         }
         catch { throw;}
     }
+    public List<User> getAllUsers()
+    {
+        try
+        {
+            var res = _userCollection.Find(u => u.Id != "").ToList();
+            return res;
+        }
+        catch { throw; }
+    }
 
+    public bool deleteUser(string id)
+    {
+        try
+        {
+            var res = _userCollection.DeleteOne(id);
+            return res.DeletedCount > 0 ? true : false;
+        }
+        catch { throw; }
+    }
 }
